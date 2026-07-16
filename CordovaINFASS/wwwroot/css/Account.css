@@ -1,0 +1,368 @@
+﻿/* Custom CSS for CordovaINFASS_ACT Login and Register Pages */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Lato', 'Montserrat', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auth-container {
+    margin-top: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 2rem;
+    background: radial-gradient(circle at 10% 20%, rgba(26, 188, 156, 0.05) 0%, rgba(44, 62, 80, 0.05) 90.2%);
+}
+
+.auth-wrapper {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    max-width: 1000px;
+    background-color: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    min-height: 600px;
+    transition: all 0.3s ease;
+}
+
+/* Left Panel - Welcome Section */
+.auth-welcome {
+    flex: 1;
+    background: linear-gradient(135deg, #1abc9c 0%, #2c3e50 100%);
+    color: #ffffff;
+    padding: 3rem;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.welcome-content {
+    position: relative;
+    z-index: 10;
+}
+
+    .welcome-content h1 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        letter-spacing: 1px;
+        animation: fadeInDown 0.8s ease;
+    }
+
+    .welcome-content p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        opacity: 0.9;
+        animation: fadeInUp 0.8s ease 0.2s both;
+    }
+
+/* Floating Decorative Shapes */
+.welcome-decoration {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.shape {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.06);
+    border-radius: 50%;
+    animation: floatAround 20s infinite ease-in-out;
+}
+
+.shape-1 {
+    width: 150px;
+    height: 150px;
+    top: -50px;
+    right: -30px;
+    animation-duration: 25s;
+}
+
+.shape-2 {
+    width: 250px;
+    height: 250px;
+    bottom: -80px;
+    left: -50px;
+    animation-duration: 35s;
+}
+
+.shape-3 {
+    width: 80px;
+    height: 80px;
+    top: 40%;
+    right: 10%;
+    animation-duration: 18s;
+}
+
+.shape-4 {
+    width: 120px;
+    height: 120px;
+    bottom: 30%;
+    right: -20px;
+    animation-duration: 28s;
+}
+
+.shape-5 {
+    width: 60px;
+    height: 60px;
+    top: 15%;
+    left: 15%;
+    animation-duration: 22s;
+}
+
+/* Right Panel - Form Section */
+.auth-form-container {
+    flex: 1.2;
+    padding: 3.5rem 3rem;
+    display: flex;
+    align-items: center;
+    background-color: #ffffff;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto;
+}
+
+    .form-wrapper h2 {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 2rem;
+        font-size: 1.8rem;
+        letter-spacing: 1px;
+        position: relative;
+    }
+
+        .form-wrapper h2::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            bottom: -8px;
+            width: 50px;
+            height: 4px;
+            background-color: #1abc9c;
+            border-radius: 2px;
+        }
+
+/* Form inputs & elements */
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    font-size: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    background-color: #f8f9fa;
+    color: #495057;
+    transition: all 0.3s ease;
+}
+
+    .form-control:focus {
+        border-color: #1abc9c;
+        background-color: #ffffff;
+        box-shadow: 0 5px 15px rgba(26, 188, 156, 0.15);
+        outline: none;
+    }
+
+.text-danger {
+    font-size: 0.85rem;
+    margin-top: 0.4rem;
+    display: block;
+}
+
+    /* Validation Summary styling */
+    .text-danger.validation-summary-errors {
+        padding: 0.75rem 1rem;
+        background-color: #fdf2f2;
+        border-left: 4px solid #dc3545;
+        border-radius: 6px;
+        margin-bottom: 1.5rem;
+    }
+
+        .text-danger.validation-summary-errors ul {
+            margin: 0;
+            padding-left: 1.2rem;
+        }
+
+/* Remember me and forgot password */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+}
+
+    .checkbox-group input[type="checkbox"] {
+        margin-right: 0.5rem;
+        accent-color: #1abc9c;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+    }
+
+    .checkbox-group label {
+        cursor: pointer;
+        user-select: none;
+        flex-grow: 1;
+    }
+
+.forgot-password {
+    color: #1abc9c;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+    .forgot-password:hover {
+        color: #2c3e50;
+        text-decoration: underline;
+    }
+
+/* Submit Button with Gradient Transition */
+.btn-login {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #1abc9c 0%, #16a085 100%);
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(26, 188, 156, 0.3);
+    text-align: center;
+    letter-spacing: 1px;
+}
+
+    .btn-login:hover {
+        background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        box-shadow: 0 5px 15px rgba(44, 62, 80, 0.3);
+        transform: translateY(-2px);
+    }
+
+    .btn-login:active {
+        transform: translateY(0);
+    }
+
+/* Register link */
+.register-link {
+    text-align: center;
+    margin-top: 2rem;
+    font-size: 0.95rem;
+    color: #6c757d;
+}
+
+    .register-link a {
+        color: #1abc9c;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        .register-link a:hover {
+            color: #2c3e50;
+            text-decoration: underline;
+        }
+
+/* Animations */
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes floatAround {
+    0%, 100% {
+        transform: translateY(0) translateX(0) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-15px) translateX(10px) rotate(5deg);
+    }
+
+    50% {
+        transform: translateY(-5px) translateX(-15px) rotate(-10deg);
+    }
+
+    75% {
+        transform: translateY(15px) translateX(5px) rotate(5deg);
+    }
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-wrapper {
+        flex-direction: column;
+        min-height: auto;
+    }
+
+    .auth-welcome {
+        padding: 2.5rem 2rem;
+        text-align: center;
+    }
+
+    .welcome-content h1 {
+        font-size: 2rem;
+    }
+
+    .welcome-content p {
+        font-size: 1rem;
+    }
+
+    .auth-form-container {
+        padding: 2.5rem 2rem;
+    }
+}
