@@ -1,34 +1,56 @@
 using CordovaINFASS.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
-using System.Linq; // Required for handling Model state error arrays
 
 namespace CordovaINFASS.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        private readonly ApplicationDbContext _context; // Add Context reference
 
-        public HomeController(ILogger<HomeController> logger)
+        // Inject the database context here
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        public IActionResult Index() => View();
+        public IActionResult Login() => View();
+        public IActionResult Register() => View();
 
-        public IActionResult Privacy()
+        // POST: /Home/Register
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Register(RegisterViewModel model)
         {
-            return View();
-        }
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return Json(new { success = false, errors = errors });
+            }
 
-        // GET: /Home/Login
-        [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
+            // Check if user already exists
+            if (_context.Users.Any(u => u.Email == model.Email))
+            {
+                return Json(new { success = false, errors = new[] { "Email is already registered." } });
+            }
+
+            // Map data to our Database Entity model
+            var newUser = new User
+            {
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                PasswordHash = model.Password // Real applications should hash this!
+            };
+
+            // Save records directly into LocalDB
+            _context.Users.Add(newUser);
+            _context.SaveChanges();
+
+            return Json(new { success = true, redirectUrl = Url.Action("Login", "Home") });
         }
 
         // POST: /Home/Login
@@ -38,59 +60,20 @@ namespace CordovaINFASS.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
                 return Json(new { success = false, errors = errors });
             }
 
-            // TODO: Add database validation and authentication logic here.
-            // If details are incorrect, return:
-            // return Json(new { success = false, errors = new[] { "Invalid email or password." } });
+            // Validate against existing records in LocalDB
+            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email && u.PasswordHash == model.Password);
 
-            return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
-        }
-
-        // GET: /Home/Logout
-        public IActionResult Logout()
-        {
-            // TODO: clear authentication session/cookie here when auth is wired up
-            return RedirectToAction("Login");
-        }
-
-        // GET: /Home/Register
-        [HttpGet]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        // POST: /Home/Register
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Register(RegisterViewModel model)
-        {
-            if (!ModelState.IsValid)
+            if (user == null)
             {
-                var errors = ModelState.Values
-                    .SelectMany(v => v.Errors)
-                    .Select(e => e.ErrorMessage)
-                    .ToList();
-
-                return Json(new { success = false, errors = errors });
+                return Json(new { success = false, errors = new[] { "Invalid email or password." } });
             }
 
-            // TODO: Add database user creation / registration logic here.
-
-            return Json(new { success = true, redirectUrl = Url.Action("Login", "Home") });
-        }
-
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            // Authentication succeeded 
+            return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
         }
     }
 }
