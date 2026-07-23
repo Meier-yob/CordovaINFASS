@@ -1,19 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using CordovaINFASS.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace CordovaINFASS.Controllers
 {
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ApplicationDbContext _context; // Add Context reference
 
-        // Inject the database context here
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        // Temporary in-memory storage
+        private static readonly List<User> Users = new();
+
+        public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
-            _context = context;
         }
 
         public IActionResult Index() => View();
@@ -27,30 +30,47 @@ namespace CordovaINFASS.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return Json(new { success = false, errors = errors });
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return Json(new { success = false, errors });
             }
 
-            // Check if user already exists
-            if (_context.Users.Any(u => u.Email == model.Email))
+            // Check if email already exists
+            if (Users.Any(u => u.Email.Equals(model.Email, StringComparison.OrdinalIgnoreCase)))
             {
-                return Json(new { success = false, errors = new[] { "Email is already registered." } });
+                return Json(new
+                {
+                    success = false,
+                    errors = new[] { "Email is already registered." }
+                });
             }
 
-            // Map data to our Database Entity model
+            // 1. Map ViewModel to User Model
             var newUser = new User
             {
+                Id = Users.Count + 1,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Email = model.Email,
-                PasswordHash = model.Password // Real applications should hash this!
+                PasswordHash = model.Password, // In production, hash this password!
+                CreatedAt = DateTime.UtcNow
             };
 
-            // Save records directly into LocalDB
-            _context.Users.Add(newUser);
-            _context.SaveChanges();
+            // 2. Add model instance to in-memory list
+            Users.Add(newUser);
 
-            return Json(new { success = true, redirectUrl = Url.Action("Login", "Home") });
+            // 3. Generate SQL Query using the instance method
+            string sqlQuery = newUser.ToInsertSqlQuery();
+
+            return Json(new
+            {
+                success = true,
+                sqlQuery = sqlQuery,
+                redirectUrl = Url.Action("Login", "Home")
+            });
         }
 
         // POST: /Home/Login
@@ -60,20 +80,32 @@ namespace CordovaINFASS.Controllers
         {
             if (!ModelState.IsValid)
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return Json(new { success = false, errors = errors });
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
+
+                return Json(new { success = false, errors });
             }
 
-            // Validate against existing records in LocalDB
-            var user = _context.Users.FirstOrDefault(u => u.Email == model.Email && u.PasswordHash == model.Password);
+            var user = Users.FirstOrDefault(u =>
+                u.Email.Equals(model.Email, StringComparison.OrdinalIgnoreCase) &&
+                u.PasswordHash == model.Password);
 
             if (user == null)
             {
-                return Json(new { success = false, errors = new[] { "Invalid email or password." } });
+                return Json(new
+                {
+                    success = false,
+                    errors = new[] { "Invalid email or password." }
+                });
             }
 
-            // Authentication succeeded 
-            return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
+            return Json(new
+            {
+                success = true,
+                redirectUrl = Url.Action("Index", "Home")
+            });
         }
     }
 }
