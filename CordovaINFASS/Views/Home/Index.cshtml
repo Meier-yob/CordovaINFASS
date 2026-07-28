@@ -1,4 +1,5 @@
-﻿@{
+﻿@model CordovaINFASS.Models.AccountSetting
+@{
     ViewData["Title"] = "Home Page";
     Layout = "_HomeLayout";
 }
@@ -418,5 +419,179 @@
             </div>
         </div>
     </div>
-   
+    <!--Account modal<!-- Account Settings Modal -->
+    <div class="modal fade" id="accountSettingsModal" tabindex="-1" aria-labelledby="accountSettingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <form id="accountSettingsForm" asp-action="UpdateAccountSettings" asp-controller="Home" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title text-uppercase fw-bold" id="accountSettingsModalLabel">
+                            <i class="fas fa-user-cog me-2"></i> Account Settings
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body p-4 text-start text-dark">
+                        <!-- Hidden field for UserId -->
+                        <input type="hidden" id="UserId" name="UserId" />
+
+                        <!-- Profile Details Section -->
+                        <h6 class="text-secondary fw-bold mb-3"><i class="fas fa-id-card me-1"></i> Personal Information</h6>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="FirstName" class="form-label fw-bold">First Name</label>
+                                <input type="text" id="FirstName" name="FirstName" class="form-control" maxlength="50" required />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="LastName" class="form-label fw-bold">Last Name</label>
+                                <input type="text" id="LastName" name="LastName" class="form-control" maxlength="50" required />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="Email" class="form-label fw-bold">Email Address</label>
+                            <input type="email" id="Email" name="Email" class="form-control" placeholder="name@example.com" required />
+                        </div>
+
+                        <hr />
+
+                        <!-- Password Change Section -->
+                        <h6 class="text-secondary fw-bold mb-3"><i class="fas fa-lock me-1"></i> Security / Change Password</h6>
+
+                        <div class="mb-3">
+                            <label for="CurrentPassword" class="form-label fw-bold">Current Password</label>
+                            <input type="password" id="CurrentPassword" name="CurrentPassword" class="form-control" placeholder="Required only if changing password" />
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="NewPassword" class="form-label fw-bold">New Password</label>
+                                <input type="password" id="NewPassword" name="NewPassword" class="form-control" placeholder="Min. 8 characters" minlength="8" />
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="ConfirmPassword" class="form-label fw-bold">Confirm New Password</label>
+                                <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" placeholder="Re-enter new password" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-1"></i> Cancel
+                        </button>
+                        <button type="submit" id="btnSaveAccount" class="btn btn-primary fw-bold">
+                            <i class="fas fa-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
+<!--Jquery and ajax--><script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function () {
+
+        // 1. Fetch user credentials when modal triggers
+        $('#accountSettingsModal').on('show.bs.modal', function () {
+            $.ajax({
+                type: "GET",
+                url: "/Home/GetAccountSettings",
+                success: function (response) {
+                    if (response.success) {
+                        $("#UserId").val(response.data.userId);
+                        $("#FirstName").val(response.data.firstName);
+                        $("#LastName").val(response.data.lastName);
+                        $("#Email").val(response.data.email);
+
+                        // Clear password inputs on open
+                        $("#CurrentPassword, #NewPassword, #ConfirmPassword").val('');
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: response.message || 'Unable to load account details.',
+                            icon: 'error'
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        title: 'Connection Error',
+                        text: 'Failed to retrieve account details.',
+                        icon: 'error'
+                    });
+                }
+            });
+        });
+
+        // 2. Submit form updates via AJAX
+        $('#accountSettingsForm').on('submit', function (e) {
+            e.preventDefault();
+
+            var $form = $(this);
+            var $btn = $('#btnSaveAccount');
+            var originalText = $btn.html();
+
+            var newPass = $('#NewPassword').val();
+            var confirmPass = $('#ConfirmPassword').val();
+
+            // Client-side quick check for password matching
+            if (newPass !== "" && newPass !== confirmPass) {
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'New password and confirm password do not match.',
+                    icon: 'warning'
+                });
+                return;
+            }
+
+            $btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-1"></i> Saving...');
+
+            $.ajax({
+                type: "POST",
+                url: $form.attr("action"),
+                data: $form.serialize(),
+                success: function (response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        }).then(() => {
+                            var modal = bootstrap.Modal.getInstance(document.getElementById('accountSettingsModal'));
+                            if (modal) {
+                                modal.hide();
+                            }
+                        });
+                    } else {
+                        var errorList = response.errors ? response.errors.map(err => `<li>${err}</li>`).join('') : 'An unexpected error occurred.';
+                        Swal.fire({
+                            title: 'Update Failed',
+                            html: `<ul style="text-align: left;">${errorList}</ul>`,
+                            icon: 'error'
+                        });
+                    }
+                },
+                error: function () {
+                    Swal.fire({
+                        title: 'System Error',
+                        text: 'An error occurred while attempting to update settings.',
+                        icon: 'error'
+                    });
+                },
+                complete: function () {
+                    $btn.prop('disabled', false).html(originalText);
+                }
+            });
+        });
+    });
+</script>
