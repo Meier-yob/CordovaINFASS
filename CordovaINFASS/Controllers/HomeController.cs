@@ -7,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace CordovaINFASS.Controllers
 {
@@ -27,6 +27,21 @@ namespace CordovaINFASS.Controllers
         public IActionResult Login() => View();
         public IActionResult Register() => View();
 
+        // New: Account page view
+        public IActionResult AccountPage() => View();
+
+        // Details view for an individual user
+        public IActionResult UserDetails(int id)
+        {
+            var user = Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
         // POST: /Home/Register
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -42,7 +57,6 @@ namespace CordovaINFASS.Controllers
                 return Json(new { success = false, errors });
             }
 
-            // Check if email already exists
             if (Users.Any(u => u.Email.Equals(model.Email, StringComparison.OrdinalIgnoreCase)))
             {
                 return Json(new
@@ -52,21 +66,18 @@ namespace CordovaINFASS.Controllers
                 });
             }
 
-            // 1. Map ViewModel to User Model
             var newUser = new User
             {
                 Id = Users.Count + 1,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
                 Email = model.Email,
-                PasswordHash = model.Password, // In production, hash this password!
+                PasswordHash = model.Password, // For demo only
                 CreatedAt = DateTime.UtcNow
             };
 
-            // 2. Add model instance to in-memory list
             Users.Add(newUser);
 
-            // 3. Generate SQL Query using the instance method
             string sqlQuery = newUser.ToInsertSqlQuery();
 
             return Json(new
@@ -77,7 +88,7 @@ namespace CordovaINFASS.Controllers
             });
         }
 
-        // POST: /Home/Login// POST: /Home/Login
+        // POST: /Home/Login
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model)
@@ -101,7 +112,6 @@ namespace CordovaINFASS.Controllers
                 return Json(new { success = false, errors = new[] { "Invalid email or password." } });
             }
 
-            // --- 🔑 ISSUE AUTHENTICATION COOKIE HERE ---
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
@@ -112,7 +122,7 @@ namespace CordovaINFASS.Controllers
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
             var authProperties = new AuthenticationProperties
             {
-                IsPersistent = true, // Keeps user logged in across browser closes
+                IsPersistent = true,
                 ExpiresUtc = DateTimeOffset.UtcNow.AddHours(8)
             };
 
@@ -123,7 +133,8 @@ namespace CordovaINFASS.Controllers
 
             return Json(new { success = true, redirectUrl = Url.Action("Index", "Home") });
         }
-        //LOGOUT
+
+        // LOGOUT
         [HttpPost]
         public async Task<IActionResult> Logout()
         {
@@ -131,11 +142,9 @@ namespace CordovaINFASS.Controllers
             return RedirectToAction("Index","Home");
         }
 
-
         [HttpGet]
         public IActionResult GetAccountSettings()
         {
-            // Read logged-in user ID directly from claims
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
             {
@@ -157,46 +166,147 @@ namespace CordovaINFASS.Controllers
             };
 
             return Json(new { success = true, data = model });
-        }           //update Usercreds
+        }
+
+        // Update account settings for currently logged user
         [HttpPost]
         [ValidateAntiForgeryToken]
         public IActionResult UpdateAccountSettings(AccountSetting model)
+        {
+            if (!ModelState.IsValid)
             {
-                if (!ModelState.IsValid)
-                {
-                    var errors = ModelState.Values
-                        .SelectMany(v => v.Errors)
-                        .Select(e => e.ErrorMessage)
-                        .ToList();
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
 
-                    return Json(new { success = false, errors });
+                return Json(new { success = false, errors });
+            }
+
+            var user = Users.FirstOrDefault(u => u.Id == model.UserId);
+            if (user == null)
+            {
+                return Json(new { success = false, errors = new[] { "User not found." } });
+            }
+
+            if (!string.IsNullOrEmpty(model.NewPassword))
+            {
+                if (user.PasswordHash != model.CurrentPassword)
+                {
+                    return Json(new { success = false, errors = new[] { "Current password does not match." } });
                 }
 
-                var user = Users.FirstOrDefault(u => u.Id == model.UserId);
-                if (user == null)
+                user.PasswordHash = model.NewPassword;
+            }
+
+            user.FirstName = model.FirstName;
+            user.LastName = model.LastName;
+            user.Email = model.Email;
+
+            return Json(new { success = true, message = "Account details updated successfully!" });
+        }
+
+        // --- API endpoints for AccountPage CRUD ---
+
+        [HttpGet]
+        public IActionResult GetUsers()
+        {
+            var data = Users
+                .Select(u => new
                 {
-                    return Json(new { success = false, errors = new[] { "User not found." } });
-                }
+                    u.Id,
+                    u.FirstName,
+                    u.LastName,
+                    u.Email,
+                    CreatedAt = u.CreatedAt.ToString("yyyy-MM-dd HH:mm")
+                })
+                .ToList();
 
-                // Verify current password if user is updating password
-                if (!string.IsNullOrEmpty(model.NewPassword))
-                {
-                    if (user.PasswordHash != model.CurrentPassword)
-                    {
-                        return Json(new { success = false, errors = new[] { "Current password does not match." } });
-                    }
+            return Json(new { success = true, data });
+        }
 
-                    user.PasswordHash = model.NewPassword;
-                }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CreateUser(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values
+                    .SelectMany(v => v.Errors)
+                    .Select(e => e.ErrorMessage)
+                    .ToList();
 
-                // Update user profile fields
-                user.FirstName = model.FirstName;
-                user.LastName = model.LastName;
-                user.Email = model.Email;
+                return Json(new { success = false, errors });
+            }
 
-                return Json(new { success = true, message = "Account details updated successfully!" });
-            
-       }
+            if (Users.Any(u => u.Email.Equals(model.Email, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Json(new { success = false, errors = new[] { "Email is already registered." } });
+            }
+
+            var newUser = new User
+            {
+                Id = Users.Count + 1,
+                FirstName = model.FirstName,
+                LastName = model.LastName,
+                Email = model.Email,
+                PasswordHash = model.Password,
+                CreatedAt = DateTime.UtcNow
+            };
+
+            Users.Add(newUser);
+
+            return Json(new
+            {
+                success = true,
+                data = new { newUser.Id, newUser.FirstName, newUser.LastName, newUser.Email, CreatedAt = newUser.CreatedAt.ToString("yyyy-MM-dd HH:mm") }
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateUser(int id, string firstName, string lastName, string email, string password)
+        {
+            var user = Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return Json(new { success = false, errors = new[] { "User not found." } });
+            }
+
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(email))
+            {
+                return Json(new { success = false, errors = new[] { "First name, last name and email are required." } });
+            }
+
+            if (!user.Email.Equals(email, StringComparison.OrdinalIgnoreCase) && Users.Any(u => u.Email.Equals(email, StringComparison.OrdinalIgnoreCase)))
+            {
+                return Json(new { success = false, errors = new[] { "Email is already registered by another user." } });
+            }
+
+            user.FirstName = firstName;
+            user.LastName = lastName;
+            user.Email = email;
+
+            if (!string.IsNullOrEmpty(password))
+            {
+                user.PasswordHash = password;
+            }
+
+            return Json(new { success = true, message = "User updated." });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteUser(int id)
+        {
+            var user = Users.FirstOrDefault(u => u.Id == id);
+            if (user == null)
+            {
+                return Json(new { success = false, errors = new[] { "User not found." } });
+            }
+
+            Users.Remove(user);
+            return Json(new { success = true, message = "User deleted." });
+        }
     }
-
 }

@@ -4,7 +4,6 @@
     Layout = "_HomeLayout";
 }
 
-
 <div id ="page-top">
     <header class="masthead bg-primary text-white text-center">
         <div class="container d-flex align-items-center flex-column">
@@ -21,6 +20,13 @@
             </div>
             <!-- Masthead Subheading-->
             <p class="masthead-subheading font-weight-light mb-0">Graphic Artist - Web Designer - Illustrator</p>
+
+            <!-- Link to new Account page (replaced the old account modal) -->
+            <div class="mt-4">
+                <a class="btn btn-light btn-lg fw-bold" href="@Url.Action("AccountPage", "Home")">
+                    <i class="fas fa-users me-2"></i> Manage Accounts
+                </a>
+            </div>
         </div>
     </header>
     <!-- Portfolio Section-->
@@ -416,79 +422,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-    <!--Account modal<!-- Account Settings Modal -->
-    <div class="modal fade" id="accountSettingsModal" tabindex="-1" aria-labelledby="accountSettingsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <form id="accountSettingsForm" asp-action="UpdateAccountSettings" asp-controller="Home" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div class="modal-header bg-primary text-white">
-                        <h5 class="modal-title text-uppercase fw-bold" id="accountSettingsModalLabel">
-                            <i class="fas fa-user-cog me-2"></i> Account Settings
-                        </h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body p-4 text-start text-dark">
-                        <!-- Hidden field for UserId -->
-                        <input type="hidden" id="UserId" name="UserId" />
-
-                        <!-- Profile Details Section -->
-                        <h6 class="text-secondary fw-bold mb-3"><i class="fas fa-id-card me-1"></i> Personal Information</h6>
-
-                        <div class="row g-3 mb-3">
-                            <div class="col-md-6">
-                                <label for="FirstName" class="form-label fw-bold">First Name</label>
-                                <input type="text" id="FirstName" name="FirstName" class="form-control" maxlength="50" required />
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="LastName" class="form-label fw-bold">Last Name</label>
-                                <input type="text" id="LastName" name="LastName" class="form-control" maxlength="50" required />
-                            </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label for="Email" class="form-label fw-bold">Email Address</label>
-                            <input type="email" id="Email" name="Email" class="form-control" placeholder="name@example.com" required />
-                        </div>
-
-                        <hr />
-
-                        <!-- Password Change Section -->
-                        <h6 class="text-secondary fw-bold mb-3"><i class="fas fa-lock me-1"></i> Security / Change Password</h6>
-
-                        <div class="mb-3">
-                            <label for="CurrentPassword" class="form-label fw-bold">Current Password</label>
-                            <input type="password" id="CurrentPassword" name="CurrentPassword" class="form-control" placeholder="Required only if changing password" />
-                        </div>
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label for="NewPassword" class="form-label fw-bold">New Password</label>
-                                <input type="password" id="NewPassword" name="NewPassword" class="form-control" placeholder="Min. 8 characters" minlength="8" />
-                            </div>
-
-                            <div class="col-md-6">
-                                <label for="ConfirmPassword" class="form-label fw-bold">Confirm New Password</label>
-                                <input type="password" id="ConfirmPassword" name="ConfirmPassword" class="form-control" placeholder="Re-enter new password" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer bg-light">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            <i class="fas fa-times me-1"></i> Cancel
-                        </button>
-                        <button type="submit" id="btnSaveAccount" class="btn btn-primary fw-bold">
-                            <i class="fas fa-save me-1"></i> Save Changes
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
