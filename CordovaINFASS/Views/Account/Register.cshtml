@@ -26,7 +26,7 @@
                 <div class="form-wrapper">
                     <h2>CREATE ACCOUNT</h2>
 
-                    <form id="registerForm" method="post" asp-action="Register">
+                    <form id="registerForm" method="post" asp-controller="Account" asp-action="Register">
                         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                         <div class="form-group">
@@ -58,7 +58,7 @@
                     </form>
 
                     <p class="register-link">
-                        Already have an account? <a asp-action="Login">Login here</a>
+                        Already have an account? <a asp-controller="Account" asp-action="Login">Login here</a>
                     </p>
                 </div>
             </div>

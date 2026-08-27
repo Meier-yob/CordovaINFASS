@@ -39,12 +39,12 @@
                     @if (User.Identity != null && User.Identity.IsAuthenticated)
                     {
                         <li class="nav-item mx-0 mx-lg-1">
-                            <a class="nav-link py-3 px-0 px-lg-3 rounded" asp-controller="Home" asp-action="AccountPage">
+                            <a class="nav-link py-3 px-0 px-lg-3 rounded" asp-controller="Account" asp-action="AccountPage">
                                 <i class="fas fa-user-cog me-1"></i> Account
                             </a>
                         </li>
                         <li class="nav-item mx-0 mx-lg-1 ms-lg-2">
-                            <form asp-controller="Home" asp-action="Logout" method="post" class="d-inline">
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                                 @Html.AntiForgeryToken()
                                 <button type="submit" class="btn btn-danger py-2 px-3 rounded text-uppercase fw-bold">
                                     <i class="fas fa-sign-out-alt me-1"></i> Logout
@@ -55,10 +55,10 @@
                     else
                     {
                         <li class="nav-item mx-0 mx-lg-1">
-                            <a class="nav-link py-3 px-0 px-lg-3 rounded" asp-controller="Home" asp-action="Login">Login</a>
+                            <a class="nav-link py-3 px-0 px-lg-3 rounded" asp-controller="Account" asp-action="Login">Login</a>
                         </li>
                         <li class="nav-item mx-0 mx-lg-1">
-                            <a class="nav-link py-3 px-0 px-lg-3 rounded" asp-controller="Home" asp-action="Register">Register</a>
+                            <a class="nav-link py-3 px-0 px-lg-3 rounded" asp-controller="Account" asp-action="Register">Register</a>
                         </li>
                     }
                 </ul>

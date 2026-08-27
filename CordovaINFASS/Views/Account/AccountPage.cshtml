@@ -86,7 +86,7 @@
         }
 
         function loadUsers() {
-            $.get('/Home/GetUsers').done(function (res) {
+            $.get('/Account/GetUsers').done(function (res) {
                 if (!res.success) {
                     Swal.fire('Error', 'Failed to load users.', 'error');
                     return;
@@ -130,7 +130,7 @@
         // Details button navigates to details view
         $tableBody.on('click', '.btn-details', function () {
             const id = $(this).closest('tr').data('id');
-            if (id) window.location.href = '/Home/UserDetails/' + id;
+            if (id) window.location.href = '/Account/UserDetails/' + id;
         });
 
         // Edit button
@@ -138,7 +138,7 @@
             const $tr = $(this).closest('tr');
             const id = $tr.data('id');
 
-            $.get('/Home/GetUsers').done(function (res) {
+            $.get('/Account/GetUsers').done(function (res) {
                 if (!res.success) { Swal.fire('Error','Failed to load user.','error'); return; }
                 const user = res.data.find(x => x.id === id);
                 if (!user) { Swal.fire('Error','User not found.','error'); return; }
@@ -166,7 +166,7 @@
                 if (!result.isConfirmed) return;
 
                 $.ajax({
-                    url: '/Home/DeleteUser',
+                    url: '/Account/DeleteUser',
                     method: 'POST',
                     data: { id: id, __RequestVerificationToken: getAntiForgeryToken() }
                 }).done(function (res) {
@@ -198,7 +198,7 @@
 
             if (id === 0) {
                 $.ajax({
-                    url: '/Home/CreateUser',
+                    url: '/Account/CreateUser',
                     method: 'POST',
                     data: {
                         FirstName: firstName,
@@ -221,7 +221,7 @@
                 });
             } else {
                 $.ajax({
-                    url: '/Home/UpdateUser',
+                    url: '/Account/UpdateUser',
                     method: 'POST',
                     data: {
                         id: id,

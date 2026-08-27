@@ -1,5 +1,4 @@
-﻿@model CordovaINFASS.Models.AccountSetting
-@{
+﻿@{
     ViewData["Title"] = "Home Page";
     Layout = "_HomeLayout";
 }
@@ -23,7 +22,7 @@
 
             <!-- Link to new Account page (replaced the old account modal) -->
             <div class="mt-4">
-                <a class="btn btn-light btn-lg fw-bold" href="@Url.Action("AccountPage", "Home")">
+                <a class="btn btn-light btn-lg fw-bold" href="@Url.Action("AccountPage", "Account")">
                     <i class="fas fa-users me-2"></i> Manage Accounts
                 </a>
             </div>
@@ -436,7 +435,7 @@
         $('#accountSettingsModal').on('show.bs.modal', function () {
             $.ajax({
                 type: "GET",
-                url: "/Home/GetAccountSettings",
+                url: "/Account/GetAccountSettings",
                 success: function (response) {
                     if (response.success) {
                         $("#UserId").val(response.data.userId);

@@ -26,7 +26,7 @@
             <div class="form-wrapper">
                 <h2>USER LOGIN</h2>
 
-                <form id="loginForm" method="post" asp-action="Login">
+                <form id="loginForm" method="post" asp-controller="Account" asp-action="Login">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                     <div class="form-group">
@@ -49,7 +49,7 @@
                 </form>
 
                 <p class="register-link">
-                    Don't have an account? <a asp-action="Register">Register here</a>
+                    Don't have an account? <a asp-controller="Account" asp-action="Register">Register here</a>
                 </p>
             </div>
         </div>
